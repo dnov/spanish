@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+  <script>
+    $(function() {
+      var n = {
+        0: 'cero',
+        1: 'uno',
+        2: 'dos',
+        3: 'tres',
+        4: 'cuatro',
+        5: 'cinco',
+        6: 'seis',
+        7: 'siete',
+        8: 'ocho',
+        9: 'nueve',
+        10: 'diez',
+        11: 'once',
+        12: 'doce',
+        13: 'trece',
+        14: 'catorce',
+        15: 'quince',
+        16: 'dieciséis',
+        17: 'diecisiete',
+        18: 'dieciocho',
+        19: 'diecinueve',
+        20: 'veinte',
+        21: 'veintiuno',
+        22: 'veintidós',
+        23: 'veintitrés',
+        24: 'veinticuatro',
+        25: 'veinticinco',
+        26: 'veintiséis',
+        27: 'veintisiete',
+        28: 'veintiocho',
+        29: 'veintinueve',
+        30: 'treinta',
+        40: 'cuarenta',
+        50: 'cincuenta',
+        60: 'sesenta',
+        70: 'setenta',
+        80: 'ochenta',
+        90: 'noventa',
+        100: 'cien',
+        200: 'doscientos',
+        300: 'trescientos',
+        400: 'cuatrocientos',
+        500: 'quinientos',
+        600: 'seiscientos',
+        700: 'setecientos',
+        800: 'ochecientos',
+        900: 'novecientos',
+        1000: 'mil',
+        1000000: 'millon'
+      };
+      
+      function shuffle(array) {
+        var currentIndex = array.length, temporaryValue, randomIndex ;
+
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+
+          // Pick a remaining element...
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex -= 1;
+
+          // And swap it with the current element.
+          temporaryValue = array[currentIndex];
+          array[currentIndex] = array[randomIndex];
+          array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+      }
+      
+      function repeat(pattern, count) {
+        if (count < 1) return '';
+        var result = '';
+        while (count > 1) {
+            if (count & 1) result += pattern;
+            count >>= 1, pattern += pattern;
+        }
+        return result + pattern;
+      }
+      
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+            
+      $('input.spanish').each(function(idx, el) {
+        var $input = $(el),
+            accentMode = false;
+        
+        $input.on('keydown', function(e) {
+          var charToInsert = null;
+          
+          if (e.which == 16) {
+            return true;
+          }
+        
+          switch (e.which) {
+            case 186: { charToInsert = (e.shiftKey ? 'Ñ' : 'ñ'); break; }
+          }
+          if (accentMode == true) {
+            switch (e.which) {
+              case 65: { charToInsert = (e.shiftKey ? 'Á' : 'á'); break; }
+              case 79: { charToInsert = (e.shiftKey ? 'Ó' : 'ó'); break; }
+              case 85: { charToInsert = (e.shiftKey ? 'Ú' : 'ú'); break; }
+              case 73: { charToInsert = (e.shiftKey ? 'Í' : 'í'); break; }
+              case 69: { charToInsert = (e.shiftKey ? 'É' : 'é'); break; }
+            }
+            if (charToInsert) {
+              accentMode = false;
+            }
+          }
+          
+          if (e.which == 222) {
+            accentMode = true;
+            
+            e.preventDefault();
+            return false;
+          } else {
+            accentMode = false;
+          }
+
+          if (charToInsert) {
+            var caretPos = $input[0].selectionStart;
+            var textAreaTxt = $input.val();
+            $input.val(textAreaTxt.substring(0, caretPos) + charToInsert + textAreaTxt.substring(caretPos) );
+            
+            e.preventDefault();
+            return false;
+          }
+        });
+        $input.on('blur', function(e) {
+          accentMode = false;
+        });        
+        
+      });
+      
+      
+      
+      var currentNumber = null;
+      
+      function newQuestion(num) {
+        currentNumber = num;
+        
+        $('#question').text(currentNumber);
+        $('#answer').val('');
+      }
+      newQuestion(getRandomInt(0, $("[name=range]:checked").val()));
+      
+      function getAnswer(num) {
+        // 0 - 30
+        if (num < 31) {
+          return n[num];
+        
+        // 31 - 99
+        } else if (num < 100) {
+          return n[Math.floor(num / 10) * 10] + (num % 10 > 0 ? ' y ' + getAnswer(num % 10) : '');
+          
+        // 100
+        } else if (num == 100) {
+          return n[num];
+          
+        // 101 - 199
+        } else if (num < 200) {
+          return 'ciento ' + getAnswer(num % 100);
+          
+        // 200 - 999
+        } else if (num < 1000) {
+          return  n[Math.floor(num / 100) * 100] + (num % 100 > 0 ? ' ' + getAnswer(num % 100) : '');
+          
+        // 1000
+        } else if (num == 1000) {
+          return n[num];
+
+        // 1001 - 1999
+        } else if (num < 2000) {
+          return 'mil' + (num % 1000 ? ' ' + getAnswer(num % 1000) : '');
+          
+        // 2000 - 999 999
+        } else if (num < 1000000) {
+          return getAnswer(Math.floor(num / 1000)) + ' mil' + (num % 1000 ? ' ' + getAnswer(num % 1000) : '');
+
+          // 1 000 000
+        } else if (num == 1000000) {
+          return n[num];
+
+        // 1 000 001 - 1 999 999
+        } else if (num < 2000000) {
+          return 'millon' + (num % 1000000 ? ' ' + getAnswer(num % 1000000) : '');
+
+        // 2 000 000 - 999 999 999
+        } else if (num < 1000000000) {
+          return getAnswer(Math.floor(num / 1000000)) + ' millones' + (num % 1000000 ? ' ' + getAnswer(num % 1000000) : '');
+
+        }
+        return '';
+      }
+      
+      function checkAnswer() {
+        var correctAnswer = getAnswer(currentNumber);
+        var answer = $("#answer").val();
+        
+        if (answer.toLowerCase() === correctAnswer) {
+          $("#history").prepend(
+            $("<div>").addClass('correct')
+                      .text(currentNumber + ' - ' + answer)
+          );
+        } else {
+          $("#history").prepend(
+            $("<div>").addClass('wrong')
+                      .text( currentNumber + ' - ' + answer + "\n" +
+                             repeat(' ', currentNumber.toString().length + 2) + '[' + correctAnswer + ']')
+          );
+        }
+        
+        newQuestion(getRandomInt(0, $("[name=range]:checked").val()));
+      }
+      
+      function customQuestion() {
+        var num = parseInt($('#custom').val(), 10);
+        if (!isNaN(num)) {
+          newQuestion(num);
+          $("#custom").val('');
+          $("#answer").focus();
+        }
+      }
+     
+      $("#answer").on('keypress', function(e) {
+        if (e.which == 13) {
+          checkAnswer();
+          
+          e.preventDefault();
+          return false;
+        }
+      });
+      
+      $("#custom").on('keypress', function(e) {
+        if (e.which == 13) {
+          customQuestion();
+          
+          e.preventDefault();
+          return false;
+        }
+      });
+      
+      $("[name=range]").change(function(e) {
+        newQuestion(getRandomInt(0, $("[name=range]:checked").val()));
+      });
+      
+      $("#main").hide();
+      $("#start").focus();
+      $("#start").click(function(e) {
+        $("#help").hide();
+        $("#main").show();
+        $("#answer").focus();
+      });
+    });
+  </script>
+  
+  <style>
+    html, body {
+      font-family: monospace;
+    }
+    input {
+      font-family: monospace;
+    }
+    #title {
+      font-weight: bold;
+      margin-bottom: 1em;
+    }
+    #help {
+      position:
+    }
+    #help div {
+      white-space: pre;
+    }
+    #help button {
+      padding: 0 1em;
+      margin-left: 1em;
+    }
+    #question {
+      margin-bottom: 0.5em;
+    }
+    #answer {
+      width: 400px;
+      margin-bottom: 1em;
+    }
+    #custom {
+      margin-bottom: 1em;
+    }
+    #history {
+      white-space: pre;
+    }
+    .wrong {
+      color: #990000;
+    }
+    .correct {
+      color: #008800;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="title">Spanish numbers auto-test</div>
+  <div id="help">
+    <div>  HOW TO USE
+    
+    1. Type the spanish translation of the number in the "Answer" field.
+    2. Press ENTER to check your answer and get a new random number from the selected number range.
+    3. The results are shown in the "History" section. <span class="correct">Green text</span> means that your answer is correct.
+       <span class="wrong">Red text</span> denotes a mistake. The correct answer is shown in square brackets.
+  
+  HOW TO TYPE DYACRITICS (e.g. áóé)
+  
+    1. Press the single quote key ['] on the keyboard (next to the ENTER key)
+    2. Press the vowel key (a,o,u,i,e)
+    
+  I DO NOT WANT A RANDOM NUMBER
+  
+    1. Type the number in the "Custom" field
+    2. Press ENTER
+    
+    </div>
+    <button id="start">START</button>
+  </div>
+
+  <div id="main">
+    Number: <div id="question"></div>
+    
+    Answer: <input id="answer" class="spanish" type="text"><br>
+    
+    Custom: <input id="custom" type="text"><br>
+    
+    <label><input name="range" type="radio" value="100" checked> 0 - 100</label><br>
+    <label><input name="range" type="radio" value="1000"> 0 - 1000</label><br>
+    <label><input name="range" type="radio" value="1000000"> 0 - 1 000 000</label><br>
+    <label><input name="range" type="radio" value="1000000000"> 0 - 1 000 000 000</label><br>
+    <br>
+
+    History: <div id="history"></div>
+  </div>
+</body>
+</html>
